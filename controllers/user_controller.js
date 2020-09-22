@@ -1,276 +1,150 @@
-const User=require('../models/user');
+const JobSeeker=require('../models/JobSeeker');
+const Recruiter = require('../models/Recruiters');
 const Post= require('../models/post');
-module.exports.profile=function(req,res){
-    User.findById(req.params.id,function(err,user){
+
+const  getToken =require('../util');
 
 
-        return res.render('user_profile',{
-        title:"PROFILE",
-       profile_user:user
 
-    });
 
-    });
-    
+
+
+
+
+module.exports.RecruiterSignIn=async function (req,res){
+
+	try{
+		let signinUser = await Recruiter.findOne({email:req.body.values.email,
+			password:req.body.values.password});
+		let token= getToken.getToken(signinUser)
+		if(signinUser)
+		{
+			console.log(signinUser)
+
+          res.send({
+                 	_id:signinUser.id,
+                 	name:signinUser.name,
+                     email:signinUser.email,
+                     userType:"company",
+                 	token:getToken.getToken(signinUser)
+                 })
+		
+                 
+		}
+		else{
+			res.status(401).send({msg:'Invalid Email/Password'})
+		}
+
+	}
+	catch(err){
+		res.send({msg:err.msg})
+
+	}
 }
 
 
+module.exports.RecruiterRegister= async function(req,res){
+    console.log("he")
+    console.log(req.body)
 
 
-
-module.exports.signUp=function(req,res){
-
-// if the user is already signin 
-    if (req.isAuthenticated()){
-        return res.redirect('/users/profile');
-    }
-
-    return res.render('signup',{
-        title: "SIGN UP"
-    });
-}
-
-module.exports.jobseekerSignup=function(req,res){
-
-// if the user is already signin 
-    if (req.isAuthenticated()){
-        return res.redirect('/users/profile');
-    }
-
-    return res.render('jobseekerSignup',{
-        title: "SIGN UP"
-    });
-}
-
-
-module.exports.signIn=function(req,res){
-
-// if the user is already signin 
-    if (req.isAuthenticated()){
-        return res.redirect('/users/profile');
-    }
-
-    return res.render('signin',{
-        title: "SIGN IN"
-    });
-}
-
-
-module.exports.jobseekerSignin=function(req,res){
-
-// if the user is already signin 
-    if (req.isAuthenticated()){
-        return res.redirect('/users/profile');
-    }
-
-    return res.render('jobseekerSignin',{
-        title: "SIGN IN"
-    });
-}
-
-
-
-//creating a user
-/*module.exports.jobseekercreate=function(req,res)
-{
-
-    if (req.body.password!=req.body.confirm_password)
-    {
-        res.redirect('back');
-    }
-
-
-    User.findOne({email:req.body.email},function(err,user){
-
-        if (err){
-            console.log('error in finding user in signing up');
-            return}
-
-            if (!user){
-            User.create({name:req.body.name,identity:req.body.id,email:req.body.email,password:req.body.password,type:"jobseeker",employment:req.body.employment},function(err,u){
-                if (err){console.log('error in  signing up');
-                return}
-            
-                    return res.render('jobseekerSignin',{title:"sign in"});
-            
-            });
-            }
-            else{
-                return res.redirect('back');
-            }
-
-    });
-    return res.render('signin',{title:"sign in"});
-    
-}*/
-//creating a user
-module.exports.create=function(req,res)
-{
-
-    if (req.body.password!=req.body.confirm_password)
-    {
-        console.log("password err");
-        res.redirect('back');
-    }
-
-
-    User.findOne({email:req.body.email},function(err,user){
-
-        if (err){
-            console.log('error in finding user in signing up');
-            return}
-
-            if (!user){
-            User.create({name:req.body.name,identity:req.body.id,email:req.body.email,password:req.body.password,type:"recruiter"},function(err,u){
-                if (err){
-                    console.log('error in  signing up');
-                return res.redirect('back');}
-
-                return res.render('signin',{title:"sign in"});
-            });
-            }
-            else{
-                return res.redirect('back');
-            }
-
-    });
-    
-}
-module.exports.jobseekercreate=function(req,res)
-{
-
-    if (req.body.password!=req.body.confirm_password)
-    {
-        console.log("password err");
-        res.redirect('back');
-    }
-
-
-    User.findOne({email:req.body.email},function(err,user){
-
-        if (err){
-            console.log('error in finding user in signing up');
-            return}
-
-            if (!user){
-            User.create({name:req.body.name,identity:req.body.id,email:req.body.email,password:req.body.password,type:"jobseeker"},function(err,u){
-                if (err){
-                    console.log('error in  signing up');
-                return res.redirect('back');}
-
-                return res.render('jobseekerSignin',{title:"sign in"});
-            });
-            }
-            else{
-                return res.redirect('back');
-            }
-
-    });
-    
-}
-
-
-
-module.exports.apply=function(req,res){
-    console.log("here");
-    Post.find({}).
-    populate('user').
-    populate({
-        path:'applications',
-        populate :{path:'user'}
-     })
-    .exec(function(err,posts)
-
-{
-
-    User.find({},function(err,users){
-
-
-
-        return res.render('applications',{
-            title:"Applications",
-            posts:posts,
-            all_users:users
-        });
-
-    });
-
-
+	try{
         
-    });
-}
+		
+          
+           let user= new Recruiter({
+           	name:req.body.values.name,
+           	email:req.body.values.email,
+           	password:req.body.values.password
+           })
 
-/*module.exports.update= async function(req,res){
-    console.log('heree')
-       if (req.user.id==req.params.id)
-       {
-        try{
-              let user=await User.findById(req.params.id);
-              User.uploadedAvatar(req,res,function(err){
-                 if (err){console.log('********multer eror',err)}
-
-                    user.name=req.body.name;
-                    user.email=req.body.email;
-                    if (req.file){{}
-                        user.avatar=User.avatarPath + '/' + req.file.filename;
-                        user.save();
-                    }
-                    return res.redirect('back');
-              });
-        }
-        catch(err){
-            return res.redirect('back');
-        }
-
-       }
-       else
-       {
-
-       }
-}*/
-
-//create session
-module.exports.applications=function(req,res){
-    
-    
-    User.find({}).populate('post').exec(function(err,users){
-    Post.find({},function(err,posts){
-
-        User.findById(req.params.id,function(err,u){
-
-             console.log("qwqwq");
-                return res.render('apply',{
-            title:"Applied",
-            posts:posts,
-            users:users,
-            user:u
-        });
-
-        });
+           let newUser= await user.save()
+           if(newUser){
                
+           	res.send({
+           		    _id:newUser.id,
+                 	name:newUser.name,
+                     email:newUser.email,
+                     userType:"company",
+                 	token:getToken.getToken(newUser)
 
-            
+           	})
+           }
+       
+       
+       else{
+           res.status(401).send({msg:"Invalid user data"})
+       }
+   
+	}
+	catch(err){
+		res.send({msg:err.message})
 
-            
-
-        });
-        
-    
-});
-
+	}
 }
-module.exports.createSession=function(req,res)
 
-{
-   // req.flash('success','Logged in Successfully');
+module.exports.JobSeekerSignIn=async function (req,res){
 
-    return res.redirect('/');
+	try{
+		let signinUser = await JobSeeker.findOne({email:req.body.values.email,
+			password:req.body.values.password});
+		let token= getToken.getToken(signinUser)
+		if(signinUser)
+		{
+			console.log(signinUser)
+
+          res.send({
+                 	_id:signinUser.id,
+                 	name:signinUser.name,
+                     email:signinUser.email,
+                     userType:"user",
+                 	token:getToken.getToken(signinUser)
+                 })
+		
+                 
+		}
+		else{
+			res.status(401).send({msg:'Invalid Email/Password'})
+		}
+
+	}
+	catch(err){
+		res.send({msg:err.msg})
+
+	}
+}
+module.exports.JobSeekerRegister= async function(req,res){
+
+	try{
+		
+          
+           let user= new JobSeeker({
+           	name:req.body.values.name,
+           	email:req.body.values.email,
+           	password:req.body.values.password
+           })
+
+           let newUser= await user.save()
+           if(newUser){
+           	res.send({
+           		    _id:newUser.id,
+                 	name:newUser.name,
+                     email:newUser.email,
+                     userType:"user",
+                 	token:getToken.getToken(newUser)
+
+           	})
+           }
+       
+       
+       else{
+           res.status(401).send({msg:"Invalid user data"})
+       }
+   
+	}
+	catch(err){
+		res.send({msg:err.msg})
+
+	}
 }
 
-
-// action for logging out
-module.exports.destroySession=function(req,res){
-    req.logout();
-  //  req.flash('success','Logged Out');
-    return res.redirect('/');
-}

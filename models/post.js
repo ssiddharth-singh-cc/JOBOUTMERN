@@ -1,51 +1,39 @@
 const mongoose= require('mongoose');
 
-const postSchema=new mongoose.Schema({
+const NewJobsSchema=new mongoose.Schema({
     
-    employmentType:{
+    title:{
         type:String,
         required:true
     },
-    profile:{
+    description:{
         type:String,
         required:true
     },
-    salary:{
-        type:Number,
-        required:true
-    },
-    per:{
-        type:String,
-        required:true
-    },
-
     requirements:{
-        type: String,
-        required: true
+        type:String,
+        required:true
     },
-    creator:{
-        type: Number
 
+    additionals:{
+        type: String
     },
-    user:{
+    
+    recruiter:{
       type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'Recruiter'
     },
     applications:[{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'JobSeeker'
     }],
 
-     comment:[{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comment'
-
-    }],
+    
     
 }, {
     timestamps:true
 
 });
-const Post= mongoose.model('Post',postSchema);
+const NewJobs= mongoose.model('NewJobs',NewJobsSchema);
 
-module.exports=Post;
+module.exports=NewJobs;

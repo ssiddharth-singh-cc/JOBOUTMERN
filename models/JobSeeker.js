@@ -1,8 +1,6 @@
 const mongoose= require('mongoose');
 
-const userSchema=new mongoose.Schema({
-	identity:{ type:Number,
-      },
+const JobSeekerSchema=new mongoose.Schema({
     email:{
         type: String,
         required: true,
@@ -18,14 +16,8 @@ const userSchema=new mongoose.Schema({
         required:true
 
     },
-    employment:{
-    	type:String
-    },
-    type:{
-    	type:String
-    },
-    post:[{type: mongoose.Schema.Types.ObjectId,
-        ref: 'Post'
+    apply:[{type: mongoose.Schema.Types.ObjectId,
+        ref: 'NewJobs'
 
     }],
 }, {
@@ -34,6 +26,6 @@ const userSchema=new mongoose.Schema({
 });
 
 
-const User= mongoose.model('User',userSchema);
+const JobSeeker= mongoose.model('JobSeeker',JobSeekerSchema);
 
-module.exports=User;
+module.exports=JobSeeker;
